@@ -142,15 +142,19 @@
     (keysig-stencil '()))
     (for-each (lambda (alt) 
          (let* ((alteration (if (grob::has-interface grob 'key-cancellation-interface) 0 (cdr alt)))
-         (glyphname (assoc-get alteration jazz-alteration-glyph-name-alist ""))
-         (padding (cond
-           ((< alteration 0) 0.25)  ; any kind of flat
-           ((= alteration 0) 0.05)    ;  natural
-           ((< alteration 1) 0.1)    ; sharp (less than double sharp)
-           (else -0.4)))                ; double sharp
-         (ypos (key-signature-interface::alteration-position (car alt) (cdr alt) c0pos))
-         (acc-stencil (grob-interpret-markup grob (markup #:raise (/ ypos 2) #:jazzglyph glyphname))))
-         (set! keysig-stencil (ly:stencil-combine-at-edge acc-stencil X RIGHT keysig-stencil padding)))) altlist)
+                (glyphname (assoc-get alteration jazz-alteration-glyph-name-alist ""))
+                (padding (cond
+                           ((< alteration 0) 0.25)  ; any kind of flat
+                           ((= alteration 0) 0.05)    ;  natural
+                           ((< alteration 1) 0.1)    ; sharp (less than double sharp)
+                           (else -0.4)))                ; double sharp
+                (ypos
+                  (key-signature-interface::alteration-position (car alt) (cdr alt) c0pos))
+                ;(acc-stencil (grob-interpret-markup grob (markup #:raise (/ ypos 2) #:jazzglyph glyphname))))
+                (acc-stencil
+                  (grob-interpret-markup
+                    grob (markup #:raise (/ ypos 2) #:jazzglyph glyphname))))
+           (set! keysig-stencil (ly:stencil-combine-at-edge acc-stencil X RIGHT keysig-stencil padding)))) altlist)
     keysig-stencil))
 
 
@@ -234,6 +238,7 @@
   (let* ((alt (ly:grob-property grob 'alteration))
          (show (if (null? (ly:grob-property grob 'forced)) (if (null? (ly:grob-object grob 'tie)) #t #f ) #t )))
     (if (equal? show #t)
+
       (grob-interpret-markup grob (markup #:jazzglyph (assoc-get alt jazz-alteration-glyph-name-alist "")))
       (ly:accidental-interface::print grob))))
 
